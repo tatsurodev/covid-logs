@@ -1,16 +1,17 @@
 <?php
 
+use App\Log;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+class LogSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Run the database seeds.
      *
      * @return void
      */
     public function run()
     {
-        $this->call(LogSeeder::class);
+        factory(Log::class, 10)->create();
     }
 }
