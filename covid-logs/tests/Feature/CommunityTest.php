@@ -34,7 +34,7 @@ class CommunityTest extends TestCase
         ]);
         $response = $this->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
-        $response->assertStatus(200)->assertJson([
+        $response->assertStatus(Response::HTTP_OK)->assertJson([
             'data' => [[
                 'data' => [
                     'id' => $community->id,
@@ -59,7 +59,7 @@ class CommunityTest extends TestCase
         // dd(json_decode($response->getContent()));
 
         // $userはcommunity未作成なのでdataはempty
-        $response->assertStatus(200)->assertExactJson([
+        $response->assertStatus(Response::HTTP_OK)->assertExactJson([
             'data' => []
         ]);
     }
@@ -76,7 +76,7 @@ class CommunityTest extends TestCase
         $storedData = Community::first();
         $this->assertEquals($this->data()['name'], $storedData->name);
         $this->assertEquals($this->data()['user_id'], $storedData->user_id);
-        $response->assertStatus(201);
+        $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
                 'id' => $storedData->id,
@@ -96,7 +96,7 @@ class CommunityTest extends TestCase
             // token削除
             array_merge($this->data(), ['api_token' => '']),
         );
-        $response->assertStatus(403);
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     // store,update用のtoken付きdata
