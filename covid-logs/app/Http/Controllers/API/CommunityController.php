@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Community;
 use App\Http\Resources\Communities\IndexResource;
 use Illuminate\Http\Request;
@@ -12,7 +13,6 @@ class CommunityController extends Controller
     {
         $this->authorizeResource(Community::class);
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -21,16 +21,6 @@ class CommunityController extends Controller
     public function index()
     {
         return IndexResource::collection(auth()->user()->communities);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -47,21 +37,10 @@ class CommunityController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Community  $community
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Community $community)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Community  $community
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Community $community)
+    public function show($id)
     {
         //
     }
@@ -70,10 +49,10 @@ class CommunityController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Community  $community
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Community $community)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -81,10 +60,10 @@ class CommunityController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Community  $community
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Community $community)
+    public function destroy($id)
     {
         //
     }

@@ -15,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:api')->group(function () {
-    Route::resource('/logs', 'LogController');
-    Route::resource('/communities', 'CommunityController');
+    Route::resource('/logs', 'API\LogController');
+    Route::resource('/communities', 'API\CommunityController');
 });
