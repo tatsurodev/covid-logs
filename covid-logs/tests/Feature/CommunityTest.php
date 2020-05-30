@@ -40,7 +40,7 @@ class CommunityTest extends TestCase
                     'user_id' => $this->user->id,
                 ],
                 'links' => [
-                    'self' => '/api/communities',
+                    'self' => '/communities',
                 ]
             ]]
         ]);
@@ -61,5 +61,49 @@ class CommunityTest extends TestCase
         $response->assertStatus(200)->assertExactJson([
             'data' => []
         ]);
+    }
+
+    // auth user store可
+    /** @test */
+    public function auth_user_can_store_community()
+    {
+        $response = $this->post(
+            '/api/communityies',
+            $this->data(),
+        );
+        // dd(json_decode($response->getContent()));
+        $storedData = Community::first();
+        $this->assertEquals($this->data()['name'], $storedData->name);
+        $this->assertEquals($this->data()['user_id'], $storedData->user_id);
+        $response->assertStatus(201);
+        $response->assertJson([
+            'data' => [
+                'id' => $storedData->id,
+            ],
+            'links' => [
+                'self' => $storedData->path(),
+            ]
+        ]);
+    }
+
+    // non-auth user store不可
+    /** @test */
+    public function non_auth_user_cannot_store_community()
+    {
+        $response = $this->post(
+            '/api/communityies',
+            array_merge($this->data(), ['api_token' => '']),
+        );
+        $response->assertStatus(403);
+    }
+
+    // store,update用のtoken付きdata
+    private function data()
+    {
+        return [
+            'name' => 'football circle',
+            'user_id' => $this->user->id,
+            'api_token' => $this->user->api_token,
+        ];
     }
 }

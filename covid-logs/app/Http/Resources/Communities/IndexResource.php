@@ -21,7 +21,7 @@ class IndexResource extends JsonResource
                 'user_id' => $this->user_id,
             ],
             'links' => [
-                'self' => '/api/communities',
+                'self' => '/communities',
             ],
         ];
     }
