@@ -6,23 +6,21 @@ use App\Community;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class CommunityTest extends TestCase
 {
     use RefreshDatabase;
 
-    // auth user, $communityは$userとrelationあり
-    protected $user, $anotherUser, $community;
+    // auth user
+    protected $user, $anotherUser;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = factory(User::class)->create();
         $this->anotherUser = factory(User::class)->create();
-        $this->community = factory(Community::class)->create([
-            'user_id' => $this->user->id
-        ]);
     }
 
     // index
@@ -31,12 +29,15 @@ class CommunityTest extends TestCase
     public function owner_can_fetch_communities()
     {
         $this->withExceptionHandling();
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id
+        ]);
         $response = $this->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
         $response->assertStatus(200)->assertJson([
             'data' => [[
                 'data' => [
-                    'id' => $this->community->id,
+                    'id' => $community->id,
                     'user_id' => $this->user->id,
                 ],
                 'links' => [
@@ -54,10 +55,10 @@ class CommunityTest extends TestCase
     {
         $this->withExceptionHandling();
         // api_tokenの所有者のdataが返ってくる
-        $response = $this->actingAs($this->anotherUser)->get("/api/communities?api_token={$this->anotherUser->api_token}");
+        $response = $this->actingAs($this->user)->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
 
-        // anotherUserはcommunity未作成なのでdataはempty
+        // $userはcommunity未作成なのでdataはempty
         $response->assertStatus(200)->assertExactJson([
             'data' => []
         ]);
@@ -92,6 +93,7 @@ class CommunityTest extends TestCase
     {
         $response = $this->post(
             '/api/communityies',
+            // token削除
             array_merge($this->data(), ['api_token' => '']),
         );
         $response->assertStatus(403);
