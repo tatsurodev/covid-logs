@@ -12,14 +12,17 @@ class CommunityTest extends TestCase
 {
     use RefreshDatabase;
 
-    // auth user
-    protected $user, $anotherUser;
+    // auth user, $communityは$userとrelationあり
+    protected $user, $anotherUser, $community;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = factory(User::class)->create();
         $this->anotherUser = factory(User::class)->create();
+        $this->community = factory(Community::class)->create([
+            'user_id' => $this->user->id
+        ]);
     }
 
     // index
@@ -28,15 +31,12 @@ class CommunityTest extends TestCase
     public function owner_can_fetch_communities()
     {
         $this->withExceptionHandling();
-        $community = factory(Community::class)->create([
-            'user_id' => $this->user->id,
-        ]);
         $response = $this->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
         $response->assertStatus(200)->assertJson([
             'data' => [[
                 'data' => [
-                    'id' => $community->id,
+                    'id' => $this->community->id,
                     'user_id' => $this->user->id,
                 ],
                 'links' => [
@@ -44,7 +44,8 @@ class CommunityTest extends TestCase
                 ]
             ]]
         ]);
-        $this->assertCount(1, Community::all());
+        // dd($response->json('data'));
+        $this->assertEquals(1, count($response->json('data')));
     }
 
     // owner以外はfetch不可
@@ -52,17 +53,11 @@ class CommunityTest extends TestCase
     public function non_owner_cannot_fetch_communities()
     {
         $this->withExceptionHandling();
-        $community = factory(Community::class)->create([
-            'user_id' => $this->user->id,
-        ]);
         // api_tokenの所有者のdataが返ってくる
         $response = $this->actingAs($this->anotherUser)->get("/api/communities?api_token={$this->anotherUser->api_token}");
         // dd(json_decode($response->getContent()));
 
-        // $ownerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$owner->api_token}");
-        // $nonOwnerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$nonOwner->api_token}");
-        // dd('ownerResponse', json_decode($ownerResponse->getContent()), 'nonOwnerResponse', json_decode($nonOwnerResponse->getContent()));
-
+        // anotherUserはcommunity未作成なのでdataはempty
         $response->assertStatus(200)->assertExactJson([
             'data' => []
         ]);
