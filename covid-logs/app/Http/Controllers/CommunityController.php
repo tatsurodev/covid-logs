@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class CommunityController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Community::class);
+    }
+
     /**
      * Display a listing of the resource.
      *
