@@ -15,7 +15,7 @@ class CommunityController extends Controller
      */
     public function index()
     {
-        return IndexResource::collection(Community::all());
+        return IndexResource::collection(auth()->user()->communities);
     }
 
     /**
