@@ -48,8 +48,16 @@ class CommunityTest extends TestCase
         $community = factory(Community::class)->create([
             'user_id' => $owner->id,
         ]);
-        $response = $this->get("/api/communities?api_token={$nonOwner->api_token}");
+        // api_tokenの所有者のdataが返ってくる
+        $response = $this->actingAs($nonOwner)->get("/api/communities?api_token={$nonOwner->api_token}");
         // dd(json_decode($response->getContent()));
-        $response->assertStatus(403);
+
+        // $ownerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$owner->api_token}");
+        // $nonOwnerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$nonOwner->api_token}");
+        // dd('ownerResponse', json_decode($ownerResponse->getContent()), 'nonOwnerResponse', json_decode($nonOwnerResponse->getContent()));
+
+        $response->assertStatus(200)->assertExactJson([
+            'data' => []
+        ]);
     }
 }
