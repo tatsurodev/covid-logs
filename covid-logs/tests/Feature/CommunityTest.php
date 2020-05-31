@@ -88,7 +88,7 @@ class CommunityTest extends TestCase
         ]);
     }
 
-    // non-auth user store不可
+    // non-auth user store不可、存在しないtokenでpostすると405, MethodNotAllowedHttpExceptionが返ってくる
     /** @test */
     public function non_auth_user_cannot_store_community()
     {
@@ -97,7 +97,7 @@ class CommunityTest extends TestCase
             // token削除
             array_merge($this->data(), ['api_token' => '']),
         );
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertStatus(Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
     // store,update用のtoken付きdata
