@@ -4,7 +4,7 @@ namespace App\Http\Resources\Communities;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class IndexResource extends JsonResource
+class StoreResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -21,7 +21,7 @@ class IndexResource extends JsonResource
                 'user_id' => $this->user_id,
             ],
             'links' => [
-                'self' => '/communities',
+                'self' => $this->path(),
             ],
         ];
     }

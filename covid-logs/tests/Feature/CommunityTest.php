@@ -6,11 +6,22 @@ use App\Community;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class CommunityTest extends TestCase
 {
     use RefreshDatabase;
+
+    // auth user
+    protected $user, $anotherUser;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = factory(User::class)->create();
+        $this->anotherUser = factory(User::class)->create();
+    }
 
     // index
     // ownerはfetch可
@@ -18,24 +29,24 @@ class CommunityTest extends TestCase
     public function owner_can_fetch_communities()
     {
         $this->withExceptionHandling();
-        $owner = factory(User::class)->create();
         $community = factory(Community::class)->create([
-            'user_id' => $owner->id,
+            'user_id' => $this->user->id
         ]);
-        $response = $this->get("/api/communities?api_token={$owner->api_token}");
+        $response = $this->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
-        $response->assertStatus(200)->assertJson([
+        $response->assertStatus(Response::HTTP_OK)->assertJson([
             'data' => [[
                 'data' => [
                     'id' => $community->id,
-                    'user_id' => $owner->id,
+                    'user_id' => $this->user->id,
                 ],
                 'links' => [
-                    'self' => '/api/communities',
+                    'self' => '/communities',
                 ]
             ]]
         ]);
-        $this->assertCount(1, Community::all());
+        // dd($response->json('data'));
+        $this->assertEquals(1, count($response->json('data')));
     }
 
     // owner以外はfetch不可
@@ -43,21 +54,59 @@ class CommunityTest extends TestCase
     public function non_owner_cannot_fetch_communities()
     {
         $this->withExceptionHandling();
-        $owner = factory(User::class)->create();
-        $nonOwner = factory(User::class)->create();
-        $community = factory(Community::class)->create([
-            'user_id' => $owner->id,
-        ]);
         // api_tokenの所有者のdataが返ってくる
-        $response = $this->actingAs($nonOwner)->get("/api/communities?api_token={$nonOwner->api_token}");
+        $response = $this->actingAs($this->user)->get("/api/communities?api_token={$this->user->api_token}");
         // dd(json_decode($response->getContent()));
 
-        // $ownerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$owner->api_token}");
-        // $nonOwnerResponse = $this->actingAs($owner)->get("/api/communities?api_token={$nonOwner->api_token}");
-        // dd('ownerResponse', json_decode($ownerResponse->getContent()), 'nonOwnerResponse', json_decode($nonOwnerResponse->getContent()));
-
-        $response->assertStatus(200)->assertExactJson([
+        // $userはcommunity未作成なのでdataはempty
+        $response->assertStatus(Response::HTTP_OK)->assertExactJson([
             'data' => []
         ]);
+    }
+
+    // auth user store可
+    /** @test */
+    public function auth_user_can_store_community()
+    {
+        $this->withExceptionHandling();
+        $response = $this->post(
+            '/api/communities',
+            $this->data(),
+        );
+        // dd(json_decode($response->getContent()));
+        $storedData = Community::first();
+        $this->assertEquals($this->data()['name'], $storedData->name);
+        $this->assertEquals($this->data()['user_id'], $storedData->user_id);
+        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertJson([
+            'data' => [
+                'id' => $storedData->id,
+            ],
+            'links' => [
+                'self' => $storedData->path(),
+            ]
+        ]);
+    }
+
+    // non-auth user store不可、存在しないtokenでpostすると405, MethodNotAllowedHttpExceptionが返ってくる
+    /** @test */
+    public function non_auth_user_cannot_store_community()
+    {
+        $response = $this->post(
+            '/api/communityies',
+            // token削除
+            array_merge($this->data(), ['api_token' => '']),
+        );
+        $response->assertStatus(Response::HTTP_METHOD_NOT_ALLOWED);
+    }
+
+    // store,update用のtoken付きdata
+    private function data()
+    {
+        return [
+            'name' => 'football circle',
+            'user_id' => $this->user->id,
+            'api_token' => $this->user->api_token,
+        ];
     }
 }

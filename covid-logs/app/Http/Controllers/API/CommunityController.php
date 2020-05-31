@@ -4,8 +4,11 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Community;
+use App\Http\Requests\Communities\StoreRequest;
 use App\Http\Resources\Communities\IndexResource;
+use App\Http\Resources\Communities\StoreResource;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CommunityController extends Controller
 {
@@ -29,9 +32,13 @@ class CommunityController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $community = Community::create($validated);
+        return (new StoreResource($community))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
