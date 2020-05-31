@@ -68,8 +68,9 @@ class CommunityTest extends TestCase
     /** @test */
     public function auth_user_can_store_community()
     {
+        $this->withExceptionHandling();
         $response = $this->post(
-            '/api/communityies',
+            '/api/communities',
             $this->data(),
         );
         // dd(json_decode($response->getContent()));

@@ -22,6 +22,29 @@ class CommunityPolicy
     }
 
     /**
+     * Determine whether the user can view the model.
+     *
+     * @param  \App\User  $user
+     * @param  \App\Community  $community
+     * @return mixed
+     */
+    public function view(User $user, Community $community)
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can create models.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function create(User $user)
+    {
+        return true;
+    }
+
+    /**
      * Determine whether the user can update the model.
      *
      * @param  \App\User  $user

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Community extends Model
 {
+    protected $guarded = ['id'];
+
     /**
      * Relation
      */
