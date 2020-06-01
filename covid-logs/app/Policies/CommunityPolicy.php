@@ -53,7 +53,8 @@ class CommunityPolicy
      */
     public function update(User $user, Community $community)
     {
-        //
+        // $user->idと$community->user_idだとtypeが何故か違ってくるので===が使えない
+        return $user->id == $community->user_id;
     }
 
     /**

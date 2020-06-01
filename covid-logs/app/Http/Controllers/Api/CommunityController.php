@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Community;
@@ -59,9 +59,13 @@ class CommunityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreRequest $request, Community $community)
     {
-        //
+        $validated = $request->validated();
+        $community->update($validated);
+        return (new StoreResource($community))
+            ->response()
+            ->setStatusCode(Response::HTTP_OK);
     }
 
     /**

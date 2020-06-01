@@ -106,20 +106,23 @@ class CommunityTest extends TestCase
     /** @test */
     public function owner_can_update_communities()
     {
+        $this->withExceptionHandling();
         $community = factory(Community::class)->create([
             'user_id' => $this->user->id
         ]);
+        // patchは一部、putは全部更新
         $response = $this->patch(
-            "/api/communityies/{$community->id}",
+            "/api/communities/{$community->id}",
             $this->data()
         );
         $storedData = $community->fresh();
+        // dd($storedData);
         $this->assertEquals($this->data()['name'], $storedData->name);
         $this->assertEquals($this->data()['user_id'], $storedData->user_id);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJson([
             'data' => [
-                'community_id' => $storedData->id,
+                'id' => $storedData->id,
             ],
             'links' => [
                 'self' => $storedData->path(),
