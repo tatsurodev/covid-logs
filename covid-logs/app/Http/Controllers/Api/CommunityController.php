@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Community;
@@ -47,9 +47,9 @@ class CommunityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Community $community)
     {
-        //
+        return new StoreResource($community);
     }
 
     /**
@@ -59,9 +59,13 @@ class CommunityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreRequest $request, Community $community)
     {
-        //
+        $validated = $request->validated();
+        $community->update($validated);
+        return (new StoreResource($community))
+            ->response()
+            ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
@@ -70,8 +74,11 @@ class CommunityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Community $community)
     {
-        //
+        $community->delete();
+        // response()->setStatusCode(204)だけだと500が返ってくるので注意
+        // return response()->noContent()->setStatusCode(Response::HTTP_NO_CONTENT);
+        return response([], Response::HTTP_NO_CONTENT);
     }
 }

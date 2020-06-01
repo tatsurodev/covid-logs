@@ -64,6 +64,7 @@ class CommunityTest extends TestCase
         ]);
     }
 
+    // store
     // auth user store可
     /** @test */
     public function auth_user_can_store_community()
@@ -98,6 +99,113 @@ class CommunityTest extends TestCase
             array_merge($this->data(), ['api_token' => '']),
         );
         $response->assertStatus(Response::HTTP_METHOD_NOT_ALLOWED);
+    }
+
+    // update
+    // ownerはupdate可
+    /** @test */
+    public function owner_can_update_communities()
+    {
+        $this->withExceptionHandling();
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id
+        ]);
+        // patchは一部、putは全部更新
+        $response = $this->patch(
+            "/api/communities/{$community->id}",
+            $this->data()
+        );
+        $storedData = $community->fresh();
+        // dd($storedData);
+        $this->assertEquals($this->data()['name'], $storedData->name);
+        $this->assertEquals($this->data()['user_id'], $storedData->user_id);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJson([
+            'data' => [
+                'id' => $storedData->id,
+            ],
+            'links' => [
+                'self' => $storedData->path(),
+            ],
+        ]);
+    }
+
+    // owner以外はupdate不可, 403
+    /** @test */
+    public function non_owner_cannot_update_communities()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->patch(
+            "/api/communities/{$community->id}",
+            array_merge(
+                $this->data(),
+                ['api_token' => $this->anotherUser->api_token]
+            )
+        );
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    // show
+    // ownerはshow可
+    /** @test */
+    public function owner_can_show_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->get("/api/communities/{$community->id}?api_token={$this->user->api_token}");
+        // dd(json_decode($response->getContent()));
+        $response->assertJson([
+            'data' => [
+                'id' => $community->id,
+                'name' => $community->name,
+                'user_id' => $community->user_id,
+            ]
+        ]);
+    }
+
+    // owner以外はshow不可、403
+    /** @test */
+    public function non_owner_cannot_show_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->get("/api/communities/{$community->id}?api_token={$this->anotherUser->api_token}");
+        // 401 unauthorized, 403 forbidden, 404 not found
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    // destroy
+    // ownerはdelete可
+    /** @test */
+    public function owner_can_destroy_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->delete(
+            "/api/communities/{$community->id}",
+            ['api_token' => $this->user->api_token]
+        );
+        $this->assertCount(0, Community::all());
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
+    }
+
+    // owner以外はdelete不可、403
+    /** @test */
+    public function non_owner_cannot_destroy_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->delete(
+            "/api/communities/{$community->id}",
+            ['api_token' => $this->anotherUser->api_token]
+        );
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     // store,update用のtoken付きdata
