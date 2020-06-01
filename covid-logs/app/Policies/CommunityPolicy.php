@@ -30,7 +30,7 @@ class CommunityPolicy
      */
     public function view(User $user, Community $community)
     {
-        //
+        return $user->id == $community->user_id;
     }
 
     /**
