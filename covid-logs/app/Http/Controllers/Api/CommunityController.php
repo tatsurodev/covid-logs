@@ -74,8 +74,11 @@ class CommunityController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Community $community)
     {
-        //
+        $community->delete();
+        // response()->setStatusCode(204)だけだと500が返ってくるので注意
+        // return response()->noContent()->setStatusCode(Response::HTTP_NO_CONTENT);
+        return response([], Response::HTTP_NO_CONTENT);
     }
 }
