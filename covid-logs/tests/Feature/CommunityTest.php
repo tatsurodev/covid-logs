@@ -178,6 +178,36 @@ class CommunityTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
+    // destroy
+    // ownerはdelete可
+    /** @test */
+    public function owner_can_destroy_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->delete(
+            "/api/communities/{$community->id}",
+            ['api_token' => $this->user->api_token]
+        );
+        $this->assertCount(0, Community::all());
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
+    }
+
+    // owner以外はdelete不可、403
+    /** @test */
+    public function non_owner_cannot_destroy_community()
+    {
+        $community = factory(Community::class)->create([
+            'user_id' => $this->user->id,
+        ]);
+        $response = $this->delete(
+            "/api/communities/{$community->id}",
+            ['api_token' => $this->anotherUser->api_token]
+        );
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
     // store,update用のtoken付きdata
     private function data()
     {
