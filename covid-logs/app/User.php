@@ -49,4 +49,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Place::class);
     }
+
+    public function companions()
+    {
+        return $this->hasMany(Companion::class);
+    }
 }

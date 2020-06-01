@@ -18,4 +18,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/logs', 'Api\LogController');
     Route::apiResource('/communities', 'Api\CommunityController');
     Route::apiResource('/places', 'Api\PlaceController');
+    Route::apiResource('/companions', 'Api\CompanionController');
 });
